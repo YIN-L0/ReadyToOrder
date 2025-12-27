@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Menu Sensei - Global Styles
+   Luxury e-commerce aesthetic (Nordstrom-like)
+   ============================================ */
+
+@layer base {
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Body defaults */
+  body {
+    @apply bg-neutral-50 text-neutral-900;
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* Selection color */
+  ::selection {
+    @apply bg-neutral-200 text-neutral-900;
+  }
+
+  /* Focus visible styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-neutral-400 ring-offset-2;
+  }
+
+  /* Remove default button styles */
+  button {
+    @apply focus:outline-none;
+  }
+}
+
+@layer components {
+  /* Card component base */
+  .card {
+    @apply bg-white rounded-2xl shadow-subtle;
+  }
+
+  .card-elevated {
+    @apply bg-white rounded-2xl shadow-soft;
+  }
+
+  /* Section spacing */
+  .section {
+    @apply py-8 sm:py-12;
+  }
+
+  /* Container */
+  .container-narrow {
+    @apply max-w-2xl mx-auto px-4 sm:px-6;
+  }
+
+  /* Typography */
+  .heading-1 {
+    @apply text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900;
+  }
+
+  .heading-2 {
+    @apply text-2xl sm:text-3xl font-semibold text-neutral-900;
+  }
+
+  .heading-3 {
+    @apply text-xl font-semibold text-neutral-900;
+  }
+
+  .body-large {
+    @apply text-lg text-neutral-600;
+  }
+
+  .body-regular {
+    @apply text-base text-neutral-700;
+  }
+
+  .body-small {
+    @apply text-sm text-neutral-600;
+  }
+
+  .label {
+    @apply text-xs font-medium text-neutral-500 uppercase tracking-wider;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Text balance for better readability */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Safe area padding for mobile */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+/* Subtle fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    theme('colors.neutral.100') 0%,
+    theme('colors.neutral.50') 50%,
+    theme('colors.neutral.100') 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   Form Elements
+   ============================================ */
+
+/* Custom checkbox */
+input[type="checkbox"] {
+  @apply w-5 h-5 rounded border-neutral-300 text-neutral-900;
+  @apply focus:ring-neutral-400 focus:ring-offset-2;
+}
+
+/* Custom radio */
+input[type="radio"] {
+  @apply w-5 h-5 border-neutral-300 text-neutral-900;
+  @apply focus:ring-neutral-400 focus:ring-offset-2;
+}
+
+/* Range slider track */
+input[type="range"] {
+  @apply w-full h-2 bg-neutral-200 rounded-full appearance-none cursor-pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply appearance-none w-5 h-5 bg-neutral-900 rounded-full cursor-pointer;
+  @apply transition-transform hover:scale-110;
+}
+
+input[type="range"]::-moz-range-thumb {
+  @apply w-5 h-5 bg-neutral-900 rounded-full cursor-pointer border-none;
+}
+
+/* ============================================
+   PWA Specific Styles
+   ============================================ */
+
+/* Prevent text selection on UI elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Touch feedback */
+@media (hover: none) {
+  .touch-feedback:active {
+    @apply opacity-70;
+    transition: opacity 0.1s;
+  }
+}
+
+/* Improve tap targets on mobile */
+@media (max-width: 640px) {
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    @apply bg-white;
+  }
+
+  .card, .card-elevated {
+    @apply shadow-none border border-neutral-200;
+  }
+}
