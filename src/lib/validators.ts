@@ -107,6 +107,19 @@ export const RecommendationSchema = z.object({
 export type Recommendation = z.infer<typeof RecommendationSchema>;
 
 /**
+ * Single dish item from the menu (for allDishes list)
+ */
+export const DishItemSchema = z.object({
+  originalName: z.string(), // 完整菜名（原语言）
+  translatedName: z.string(), // 翻译后的菜名
+  priceOriginal: z.string().nullable(), // 原始价格（菜单上显示的）
+  priceConverted: z.string().nullable(), // 转换后的价格（用户货币）
+  category: z.string().nullable(), // 菜单分类（如海鲜、热菜等）
+});
+
+export type DishItem = z.infer<typeof DishItemSchema>;
+
+/**
  * Response from /api/analyze
  */
 export const AnalyzeResponseSchema = z.object({
@@ -115,6 +128,7 @@ export const AnalyzeResponseSchema = z.object({
   translatedMenuPreview: z.string(),
   readability: ReadabilitySchema,
   evidenceSnippets: z.array(z.string()),
+  allDishes: z.array(DishItemSchema).optional(), // 菜单中识别到的所有菜品
   recommendations: z.array(RecommendationSchema),
 });
 
@@ -157,6 +171,38 @@ export function preprocessAnalyzeResponse(data: unknown): unknown {
   }
   if (!Array.isArray(obj.evidenceSnippets)) {
     obj.evidenceSnippets = [];
+  }
+
+  // Normalize allDishes
+  if (Array.isArray(obj.allDishes)) {
+    obj.allDishes = obj.allDishes.map((dish: unknown) => {
+      if (typeof dish !== 'object' || dish === null) {
+        return dish;
+      }
+      const d = dish as Record<string, unknown>;
+
+      // Default fields
+      if (typeof d.originalName !== 'string') {
+        d.originalName = '';
+      }
+      if (typeof d.translatedName !== 'string') {
+        d.translatedName = '';
+      }
+      // Support both old 'price' field and new 'priceOriginal' field
+      if (d.priceOriginal === undefined) {
+        d.priceOriginal = d.price !== undefined ? d.price : null;
+      }
+      if (d.priceConverted === undefined) {
+        d.priceConverted = null;
+      }
+      if (d.category === undefined) {
+        d.category = null;
+      }
+      // Remove old 'price' field if it exists
+      delete d.price;
+
+      return d;
+    });
   }
 
   // Normalize recommendations

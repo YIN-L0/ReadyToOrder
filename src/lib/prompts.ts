@@ -15,6 +15,18 @@ CRITICAL RULES:
 6. Do NOT include any markdown formatting, code blocks, or extra text - only raw JSON.
 7. Try to identify the restaurant name from the menu if visible (logos, headers, footers).
 
+DISH NAME EXTRACTION RULES (VERY IMPORTANT):
+- Extract COMPLETE DISH NAMES that include cooking method + main ingredient, NOT just ingredient names.
+- A proper dish name describes HOW the food is prepared, not just WHAT it is.
+- ✅ CORRECT examples: "糖醋鱼" (Sweet and Sour Fish), "蒜蓉大虾" (Garlic Prawns), "红烧章鱼" (Braised Octopus), "清蒸鲈鱼" (Steamed Sea Bass), "麻婆豆腐" (Mapo Tofu), "Camarón a la diabla" (Spicy Devil Shrimp), "Pulpo al mojo de ajo" (Garlic Octopus)
+- ❌ WRONG examples: "鱼" (Fish), "虾" (Shrimp), "章鱼" (Octopus), "豆腐" (Tofu), "Pulpo" (Octopus), "Camarón" (Shrimp) - these are just ingredients, NOT dish names!
+- CRITICAL: Many menus list an ingredient (e.g., "Pulpo", "Camarón") with cooking style options below it (e.g., "a la diabla", "al mojo de ajo", "a la plancha"). You MUST split these into SEPARATE complete dish entries:
+  - ✅ CORRECT: List as separate dishes: "Pulpo a la diabla", "Pulpo al guajillo", "Pulpo al mojo de ajo", "Pulpo a la mexicana" (4 separate entries)
+  - ❌ WRONG: Combine into one: "Pulpo (a la diabla, al guajillo, al mojo de ajo, a la mexicana)"
+- Each cooking style option = one separate dish entry in allDishes
+- Category headers like "海鲜类" (Seafood), "肉类" (Meat) are NOT dish names - skip them.
+- Each menu item with a price is typically a complete dish - extract the full name as shown.
+
 ANALYSIS PROCESS:
 1. First, assess image quality and readability.
 2. Look for restaurant name/logo on the menu.
@@ -110,7 +122,36 @@ export function getMenuAnalysisUserPrompt(preferences: Preferences): string {
     high: 'loves adventurous, unique dishes - local specialties, unusual ingredients, authentic local flavors',
   };
 
+  // Map target language to currency for price conversion
+  const currencyMap: Record<string, { currency: string; symbol: string; rate: string }> = {
+    'zh-CN': { currency: 'CNY', symbol: '¥', rate: '~7.2 CNY per USD, ~0.42 CNY per MXN peso' },
+    'zh-TW': { currency: 'TWD', symbol: 'NT$', rate: '~32 TWD per USD, ~1.9 TWD per MXN peso' },
+    'en': { currency: 'USD', symbol: '$', rate: '~1 USD per 17 MXN pesos, ~0.14 USD per CNY' },
+    'ja': { currency: 'JPY', symbol: '¥', rate: '~150 JPY per USD, ~8.8 JPY per MXN peso' },
+    'ko': { currency: 'KRW', symbol: '₩', rate: '~1350 KRW per USD, ~79 KRW per MXN peso' },
+    'fr': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
+    'de': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
+    'es': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
+    'it': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
+    'pt': { currency: 'BRL', symbol: 'R$', rate: '~5 BRL per USD, ~0.29 BRL per MXN peso' },
+  };
+  const targetCurrency = currencyMap[targetLanguage] || currencyMap['en'];
+
   return `Analyze this menu image and provide personalized dish recommendations.
+
+MENU EXTRACTION INSTRUCTIONS:
+1. First, identify ALL individual dishes on the menu (each item with a price is a dish).
+2. Extract the COMPLETE dish name for each item - this must include the cooking method/style, not just the ingredient.
+   - Example: "清蒸石斑鱼" (Steamed Grouper) is correct, "石斑鱼" (Grouper) alone is wrong.
+   - Example: "蒜蓉粉丝蒸扇贝" (Steamed Scallops with Garlic and Vermicelli) is correct, "扇贝" (Scallops) alone is wrong.
+3. Ignore category headers (like "海鲜", "热菜", "凉菜") - these are not dishes.
+4. From the complete list of dishes, select the TOP 3 that best match user preferences.
+
+PRICE CONVERSION:
+- For each dish, provide BOTH the original price AND the converted price in the user's currency.
+- User's target currency: ${targetCurrency.currency} (${targetCurrency.symbol})
+- Conversion rates: ${targetCurrency.rate}
+- Format: "priceOriginal" = exact price from menu, "priceConverted" = "${targetCurrency.symbol}XX.XX" (approximate conversion)
 
 USER PREFERENCES:
 - Spicy tolerance: ${spicyLevel}/5 (0=no spice, 5=very spicy is fine)
@@ -131,6 +172,15 @@ Respond with ONLY valid JSON in this exact format:
     "needsRetake": false
   },
   "evidenceSnippets": ["exact text fragments you can see in the image"],
+  "allDishes": [
+    {
+      "originalName": "complete dish name in original language (e.g., Pulpo a la diabla)",
+      "translatedName": "translated dish name (e.g., Spicy Devil Octopus)",
+      "priceOriginal": "exact price from menu (e.g., $280.00 MXN)",
+      "priceConverted": "converted price in user's currency (e.g., ${targetCurrency.symbol}117.60)",
+      "category": "menu category if applicable (e.g., Seafood, Appetizers)"
+    }
+  ],
   "recommendations": [
     {
       "id": "unique-id-1",
@@ -189,9 +239,53 @@ export function getMockAnalyzeResponse(): object {
       needsRetake: false
     },
     evidenceSnippets: [
-      "ラーメン (Ramen)",
-      "天ぷら定食 (Tempura Set)",
-      "寿司盛り合わせ (Sushi Platter)"
+      "とんこつラーメン ¥980",
+      "天ぷら定食 ¥1500",
+      "サーモンいくら丼 ¥1800"
+    ],
+    allDishes: [
+      {
+        originalName: "とんこつラーメン",
+        translatedName: "豚骨拉面",
+        priceOriginal: "¥980",
+        priceConverted: "¥47.00",
+        category: "拉面"
+      },
+      {
+        originalName: "味噌ラーメン",
+        translatedName: "味噌拉面",
+        priceOriginal: "¥950",
+        priceConverted: "¥45.60",
+        category: "拉面"
+      },
+      {
+        originalName: "天ぷら定食",
+        translatedName: "天妇罗定食",
+        priceOriginal: "¥1500",
+        priceConverted: "¥72.00",
+        category: "套餐"
+      },
+      {
+        originalName: "サーモンいくら丼",
+        translatedName: "三文鱼鱼籽盖饭",
+        priceOriginal: "¥1800",
+        priceConverted: "¥86.40",
+        category: "盖饭"
+      },
+      {
+        originalName: "寿司盛り合わせ",
+        translatedName: "什锦寿司拼盘",
+        priceOriginal: "¥2500",
+        priceConverted: "¥120.00",
+        category: "寿司"
+      },
+      {
+        originalName: "焼き鳥盛り合わせ",
+        translatedName: "什锦烤鸡肉串",
+        priceOriginal: "¥1200",
+        priceConverted: "¥57.60",
+        category: "烤物"
+      }
     ],
     recommendations: [
       {
