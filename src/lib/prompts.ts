@@ -49,19 +49,23 @@ ANALYSIS PROCESS:
    - How do the flavors develop as you eat it? First bite vs finish?
    - What makes this dish's taste unique or memorable?
 
-   **history** (2-3 paragraphs):
-   - When and where did this dish originate?
-   - Who invented it? Any legends or stories?
-   - How has it evolved over time?
-   - Cultural significance: festivals, celebrations, daily life?
-   - Regional variations or family traditions?
+   **history** (2-3 paragraphs) - MUST BE UNIQUE AND SPECIFIC FOR EACH DISH:
+   - ORIGIN STORY: Exact year/era and city/region where this dish was created. Name the specific person, chef, or family who invented it if known.
+   - LEGENDARY TALES: Include any famous legends, myths, or amusing stories about the dish's creation (e.g., was it an accident? A royal request? A solution to scarcity?)
+   - HISTORICAL FIGURES: Did any emperor, president, celebrity, or famous person popularize this dish? Any documented historical events involving it?
+   - EVOLUTION: How has the recipe changed over centuries? What was the original version vs modern version?
+   - CULTURAL MILESTONES: Is it part of UNESCO heritage? Featured in famous films/books? Associated with specific historical events?
+   - REGIONAL WARS: Do different cities/regions claim to be the "true" birthplace? Any friendly rivalries?
+   - EACH DISH'S HISTORY MUST BE DISTINCTLY DIFFERENT - avoid generic phrases like "has a long history" or "dates back centuries"
 
-   **publicReviews** (2-3 paragraphs):
-   - What do food critics and bloggers say?
-   - Common praise: what do people love most?
-   - Common complaints or things to be aware of?
-   - Social media presence: Instagram-worthy? TikTok famous?
-   - Typical ratings on platforms like Yelp, Google, TripAdvisor?
+   **publicReviews** (2-3 paragraphs) - MUST INCLUDE SPECIFIC DETAILS:
+   - FAMOUS CRITICS: Quote or reference specific food critics, Michelin guides, or famous food writers if applicable
+   - VIRAL MOMENTS: Has this dish gone viral on TikTok/Instagram? Any specific viral videos or trends?
+   - CELEBRITY ENDORSEMENTS: Have any celebrities publicly praised this dish or this restaurant's version?
+   - COMMON EXPERIENCES: What do first-time eaters typically say? Any "initiation" moments or funny reactions?
+   - CONTROVERSY: Any debates about "authentic" vs "modified" versions? Purist opinions?
+   - COMPARISON RATINGS: How does this restaurant's version compare to others? Any local awards?
+   - AVOID generic reviews like "people love it" - include SPECIFIC praise points and critiques
 
    **userPreferenceMatch** (1-2 paragraphs):
    - How specifically does this match the user's stated spice tolerance?
@@ -228,8 +232,8 @@ Respond with ONLY valid JSON in this exact format:
       "reasons": {
         "localSpecialty": "2-3 paragraphs about regional fame, popularity among locals/tourists, famous versions, seasonal availability...",
         "tasteDescription": "2-3 paragraphs about flavors, textures, temperature, aroma, how taste develops, what makes it unique...",
-        "history": "2-3 paragraphs about origin, inventor/legends, evolution over time, cultural significance, regional variations...",
-        "publicReviews": "2-3 paragraphs about critic reviews, common praise/complaints, social media presence, typical ratings...",
+        "history": "2-3 paragraphs with SPECIFIC details: exact origin year/place, inventor's name, legends/myths, famous historical figures who ate it, how it evolved, UNESCO status, film appearances. MUST BE UNIQUE for each dish - NO generic 'long history' phrases!",
+        "publicReviews": "2-3 paragraphs with SPECIFIC details: named critics/guides, viral TikTok/Instagram moments, celebrity endorsements, first-timer reactions, authenticity debates, local awards. AVOID generic 'people love it' - give SPECIFIC praise and critiques!",
         "userPreferenceMatch": "1-2 paragraphs about how it matches user's spice tolerance, budget, adventurousness, dietary needs...",
         "ingredients": "1-2 paragraphs about main components, sauces, special ingredients, allergens..."
       },
@@ -239,7 +243,11 @@ Respond with ONLY valid JSON in this exact format:
   ]
 }
 
-IMPORTANT: Each "reasons" field should contain RICH, DETAILED content (2-3 paragraphs each for localSpecialty, tasteDescription, history, publicReviews; 1-2 paragraphs for userPreferenceMatch and ingredients). Do NOT provide short one-sentence answers.
+IMPORTANT CONTENT REQUIREMENTS:
+1. Each "reasons" field must contain RICH, DETAILED content (2-3 paragraphs each for localSpecialty, tasteDescription, history, publicReviews; 1-2 paragraphs for userPreferenceMatch and ingredients).
+2. CRITICAL: The "history" field for EACH dish must be COMPLETELY DIFFERENT and UNIQUE - include specific years, inventor names, legends, and historical figures. Do NOT use generic phrases like "has a rich history" or "dates back to ancient times".
+3. CRITICAL: The "publicReviews" field must include SPECIFIC details - name food critics, mention viral social media moments, celebrity endorsements, and specific praise/complaints. Do NOT use generic phrases like "highly praised" or "popular among diners".
+4. Each dish's story should feel like reading a mini Wikipedia article - full of interesting facts and trivia that make each dish memorable and distinct from the others.
 
 CRITICAL - OUTPUT LANGUAGE: Write ALL content in ${targetLanguage}:
 - translatedName, translatedMenuPreview, localizedEquivalent: in ${targetLanguage}
