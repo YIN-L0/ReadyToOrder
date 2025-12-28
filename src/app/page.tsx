@@ -94,19 +94,10 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-neutral-50/80 backdrop-blur-lg border-b border-neutral-100">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            {/* Logo with cat5 */}
-            <div className="flex items-center gap-2">
-              <Image
-                src="/cat5.png"
-                alt="Menu Sensei Cat"
-                width={36}
-                height={36}
-                className="object-contain"
-              />
-              <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
-                Menu Sensei
-              </h1>
-            </div>
+            {/* Logo */}
+            <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
+              Menu Sensei
+            </h1>
 
             {/* Settings toggle */}
             <button
@@ -164,10 +155,21 @@ export default function HomePage() {
             <h2 className="text-3xl sm:text-4xl font-semibold text-neutral-900 mb-3 tracking-tight">
               Discover Your Perfect Dish
             </h2>
-            <p className="text-lg text-neutral-500 max-w-md mx-auto">
+            <p className="text-lg text-neutral-500 max-w-md mx-auto mb-6">
               Snap a photo of any foreign menu and get personalized recommendations
               translated just for you.
             </p>
+            {/* Cat mascot */}
+            <div className="flex justify-center">
+              <Image
+                src="/cat5.png"
+                alt="Menu Sensei Cat"
+                width={160}
+                height={160}
+                className="object-contain"
+                priority
+              />
+            </div>
           </div>
         )}
 
