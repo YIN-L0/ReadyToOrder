@@ -133,22 +133,31 @@ export async function generateDishImage(
 
     throw new Error('No image data in Gemini response');
   } catch (error) {
-    safeLog.error('Gemini image generation error', error);
+    // Log the full error details for debugging
+    const errorDetails = {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    };
+    safeLog.error('Gemini image generation error', errorDetails);
 
     // Handle specific error types
     if (error instanceof Error) {
-      if (error.message.includes('API_KEY') || error.message.includes('401')) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes('api_key') || msg.includes('401') || msg.includes('invalid')) {
         throw new Error('Invalid Gemini API key. Please check your configuration.');
       }
-      if (error.message.includes('SAFETY') || error.message.includes('blocked')) {
+      if (msg.includes('safety') || msg.includes('blocked')) {
         throw new Error('Image generation blocked by safety filters. Try a different dish.');
       }
-      if (error.message.includes('quota') || error.message.includes('rate') || error.message.includes('429')) {
+      if (msg.includes('quota') || msg.includes('rate') || msg.includes('429') || msg.includes('resource_exhausted')) {
         throw new Error('Rate limit exceeded. Please try again in a moment.');
       }
-      if (error.message.includes('not found') || error.message.includes('404')) {
+      if (msg.includes('not found') || msg.includes('404') || msg.includes('not_found')) {
         throw new Error('Image generation model not available. Please try again later.');
       }
+      // Pass through the original error message for debugging
+      throw new Error('Image generation failed: ' + error.message);
     }
 
     throw new Error('Failed to generate image. Please try again.');
