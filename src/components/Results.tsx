@@ -107,40 +107,59 @@ export function Results({ data }: ResultsProps) {
         {/* All Dishes from Menu (collapsible) */}
         {allDishes && allDishes.length > 0 && (
           <Collapse title={`All Menu Items (${allDishes.length})`} defaultOpen={true}>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {allDishes.map((dish, i) => (
                 <div
                   key={i}
-                  className="flex items-start justify-between gap-3 py-2 border-b border-neutral-100 last:border-0"
+                  className="py-3 border-b border-neutral-100 last:border-0"
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <UtensilsCrossed className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
-                      <p className="text-sm font-medium text-neutral-900 truncate">
-                        {dish.translatedName}
-                      </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2">
+                        <UtensilsCrossed className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium text-neutral-900">
+                            {dish.translatedName}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            {dish.originalName}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-neutral-500 ml-5.5 truncate">
-                      {dish.originalName}
-                    </p>
-                    {dish.category && (
-                      <span className="text-xs text-neutral-400 ml-5.5">
-                        {dish.category}
-                      </span>
-                    )}
+                    <div className="text-right flex-shrink-0">
+                      {dish.priceConverted && (
+                        <p className="text-sm font-medium text-neutral-900">
+                          {dish.priceConverted}
+                        </p>
+                      )}
+                      {dish.priceOriginal && (
+                        <p className="text-xs text-neutral-500">
+                          {dish.priceOriginal}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    {dish.priceConverted && (
-                      <p className="text-sm font-medium text-neutral-900">
-                        {dish.priceConverted}
-                      </p>
-                    )}
-                    {dish.priceOriginal && (
-                      <p className="text-xs text-neutral-500">
-                        {dish.priceOriginal}
-                      </p>
-                    )}
-                  </div>
+                  {/* Description/Ingredients */}
+                  {(dish.translatedDescription || dish.originalDescription) && (
+                    <div className="mt-1.5 ml-5.5 pl-0.5">
+                      {dish.translatedDescription && (
+                        <p className="text-xs text-neutral-600">
+                          {dish.translatedDescription}
+                        </p>
+                      )}
+                      {dish.originalDescription && dish.translatedDescription !== dish.originalDescription && (
+                        <p className="text-xs text-neutral-400 italic">
+                          {dish.originalDescription}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {dish.category && (
+                    <span className="inline-block mt-1.5 ml-5.5 text-xs text-neutral-400 bg-neutral-50 px-2 py-0.5 rounded">
+                      {dish.category}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>

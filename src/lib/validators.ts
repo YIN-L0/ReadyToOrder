@@ -115,6 +115,8 @@ export type Recommendation = z.infer<typeof RecommendationSchema>;
 export const DishItemSchema = z.object({
   originalName: z.string(), // 完整菜名（原语言）
   translatedName: z.string(), // 翻译后的菜名
+  originalDescription: z.string().nullable(), // 原始描述/食材（原语言）
+  translatedDescription: z.string().nullable(), // 翻译后的描述/食材
   priceOriginal: z.string().nullable(), // 原始价格（菜单上显示的）
   priceConverted: z.string().nullable(), // 转换后的价格（用户货币）
   category: z.string().nullable(), // 菜单分类（如海鲜、热菜等）
@@ -191,6 +193,13 @@ export function preprocessAnalyzeResponse(data: unknown): unknown {
       if (typeof d.translatedName !== 'string') {
         d.translatedName = '';
       }
+      // Description fields
+      if (d.originalDescription === undefined) {
+        d.originalDescription = d.description !== undefined ? d.description : null;
+      }
+      if (d.translatedDescription === undefined) {
+        d.translatedDescription = null;
+      }
       // Support both old 'price' field and new 'priceOriginal' field
       if (d.priceOriginal === undefined) {
         d.priceOriginal = d.price !== undefined ? d.price : null;
@@ -201,8 +210,9 @@ export function preprocessAnalyzeResponse(data: unknown): unknown {
       if (d.category === undefined) {
         d.category = null;
       }
-      // Remove old 'price' field if it exists
+      // Remove old fields if they exist
       delete d.price;
+      delete d.description;
 
       return d;
     });

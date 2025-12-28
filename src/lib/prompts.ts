@@ -177,13 +177,18 @@ export function getMenuAnalysisUserPrompt(preferences: Preferences): string {
 
   return `Analyze this menu image and provide personalized dish recommendations.
 
-MENU EXTRACTION INSTRUCTIONS:
-1. First, identify ALL individual dishes on the menu (each item with a price is a dish).
-2. Extract the COMPLETE dish name for each item - this must include the cooking method/style, not just the ingredient.
+MENU EXTRACTION INSTRUCTIONS (VERY IMPORTANT - EXTRACT ALL DISHES):
+1. CRITICAL: You MUST identify and list EVERY SINGLE dish on the menu. Do NOT skip any dishes. Count them carefully.
+2. For EACH dish, extract:
+   - The complete dish NAME (including cooking method/style)
+   - The DESCRIPTION/INGREDIENTS shown below the dish name (if any)
+   - The PRICE
+3. Extract the COMPLETE dish name for each item - this must include the cooking method/style, not just the ingredient.
    - Example: "清蒸石斑鱼" (Steamed Grouper) is correct, "石斑鱼" (Grouper) alone is wrong.
    - Example: "蒜蓉粉丝蒸扇贝" (Steamed Scallops with Garlic and Vermicelli) is correct, "扇贝" (Scallops) alone is wrong.
-3. Ignore category headers (like "海鲜", "热菜", "凉菜") - these are not dishes.
-4. From the complete list of dishes, select the TOP 3 that best match user preferences.
+4. For descriptions/ingredients, include ALL text shown under each dish name (e.g., "pulpo, chile guajillo, cebolla, aguacate, cilantro")
+5. Ignore category headers (like "海鲜", "热菜", "凉菜", "TOSTADAS", "CLÁSICAS") - these are not dishes.
+6. From the complete list of dishes, select the TOP 3 that best match user preferences.
 
 PRICE CONVERSION:
 - For each dish, provide BOTH the original price AND the converted price in the user's home currency.
@@ -215,6 +220,8 @@ Respond with ONLY valid JSON in this exact format:
     {
       "originalName": "complete dish name in original language (e.g., Pulpo a la diabla)",
       "translatedName": "translated dish name (e.g., Spicy Devil Octopus)",
+      "originalDescription": "ingredients/description from menu in original language (e.g., 'pulpo, chile guajillo, cebolla, cilantro')",
+      "translatedDescription": "translated ingredients/description (e.g., 'octopus, guajillo chili, onion, cilantro')",
       "priceOriginal": "exact price from menu in ${sourceCurrency.currency} (e.g., ${sourceCurrency.symbol}280.00)",
       "priceConverted": "converted price in ${targetCurrency.currency} (e.g., ${targetCurrency.symbol}XX.XX)",
       "category": "menu category if applicable (e.g., Seafood, Appetizers)"
