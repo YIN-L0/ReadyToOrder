@@ -11,6 +11,35 @@ function isMockMode(): boolean {
 }
 
 /**
+ * Recursively sanitize response to handle special characters in any language
+ * This ensures Chinese, Japanese, Korean, Arabic, Hebrew, Thai, etc. all work correctly
+ */
+function sanitizeResponse(obj: unknown): unknown {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+
+  if (typeof obj === 'string') {
+    // Normalize unicode and trim whitespace
+    return obj.normalize('NFC').trim();
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => sanitizeResponse(item));
+  }
+
+  if (typeof obj === 'object') {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      sanitized[key] = sanitizeResponse(value);
+    }
+    return sanitized;
+  }
+
+  return obj;
+}
+
+/**
  * Create OpenAI client
  */
 function createClient(): OpenAI {
@@ -89,21 +118,35 @@ export async function analyzeMenu(
     try {
       // Try to extract JSON if wrapped in code blocks
       const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      const jsonString = jsonMatch ? jsonMatch[1] : content;
-      parsedResponse = JSON.parse(jsonString.trim());
+      let jsonString = jsonMatch ? jsonMatch[1] : content;
+
+      // Clean up the JSON string - remove any control characters that might cause issues
+      jsonString = jsonString.trim()
+        .replace(/[\x00-\x1F\x7F]/g, (char) => {
+          // Keep newlines and tabs in strings, remove other control chars
+          if (char === '\n' || char === '\r' || char === '\t') return char;
+          return '';
+        });
+
+      parsedResponse = JSON.parse(jsonString);
     } catch (parseError) {
       safeLog.error('Failed to parse OpenAI response as JSON', {
         content: content.substring(0, 500),
+        error: parseError instanceof Error ? parseError.message : 'Unknown parse error',
       });
-      throw new Error('Invalid JSON response from OpenAI');
+      throw new Error('Invalid JSON response from OpenAI. Please try again.');
     }
 
+    // Sanitize the parsed response to handle special characters
+    const sanitizedResponse = sanitizeResponse(parsedResponse);
+
     // Validate against schema
-    const validation = validateResponse(AnalyzeResponseSchema, parsedResponse);
+    const validation = validateResponse(AnalyzeResponseSchema, sanitizedResponse);
 
     if (!validation.success) {
       safeLog.error('Response validation failed', { error: validation.error });
-      throw new Error(`Response validation failed: ${validation.error}`);
+      // Try to return a partial response if possible
+      throw new Error(`Response validation failed: ${validation.error}. Please try again.`);
     }
 
     safeLog.info('Menu analysis completed successfully', {
