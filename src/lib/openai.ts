@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { Preferences, AnalyzeResponse, AnalyzeResponseSchema, validateResponse } from './validators';
+import { Preferences, AnalyzeResponse, AnalyzeResponseSchema, validateResponse, preprocessAnalyzeResponse } from './validators';
 import { getMenuAnalysisSystemPrompt, getMenuAnalysisUserPrompt, getMockAnalyzeResponse } from './prompts';
 import { safeLog } from './safeLog';
 
@@ -140,11 +140,20 @@ export async function analyzeMenu(
     // Sanitize the parsed response to handle special characters
     const sanitizedResponse = sanitizeResponse(parsedResponse);
 
+    // Pre-process to fill in defaults and normalize values
+    const preprocessedResponse = preprocessAnalyzeResponse(sanitizedResponse);
+
     // Validate against schema
-    const validation = validateResponse(AnalyzeResponseSchema, sanitizedResponse);
+    const validation = validateResponse(AnalyzeResponseSchema, preprocessedResponse);
 
     if (!validation.success) {
-      safeLog.error('Response validation failed', { error: validation.error });
+      safeLog.error('Response validation failed', {
+        error: validation.error,
+        responseKeys: typeof preprocessedResponse === 'object' && preprocessedResponse !== null
+          ? Object.keys(preprocessedResponse as object)
+          : 'not an object',
+        rawResponseSnippet: JSON.stringify(preprocessedResponse).substring(0, 500),
+      });
       // Try to return a partial response if possible
       throw new Error(`Response validation failed: ${validation.error}. Please try again.`);
     }

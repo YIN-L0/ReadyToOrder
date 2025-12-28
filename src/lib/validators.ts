@@ -55,6 +55,17 @@ export type GenerateImageRequest = z.infer<typeof GenerateImageRequestSchema>;
 // ============================================
 
 /**
+ * Normalize readability value
+ */
+function normalizeReadability(val: string): 'good' | 'medium' | 'poor' {
+  const normalized = val.toLowerCase().trim();
+  if (normalized === 'good' || normalized === 'excellent' || normalized === 'great') return 'good';
+  if (normalized === 'medium' || normalized === 'moderate' || normalized === 'fair' || normalized === 'average') return 'medium';
+  if (normalized === 'poor' || normalized === 'bad' || normalized === 'low') return 'poor';
+  return 'medium';
+}
+
+/**
  * Readability assessment of the menu image
  */
 export const ReadabilitySchema = z.object({
@@ -108,6 +119,105 @@ export const AnalyzeResponseSchema = z.object({
 });
 
 export type AnalyzeResponse = z.infer<typeof AnalyzeResponseSchema>;
+
+/**
+ * Pre-process OpenAI response to fill in defaults and normalize values
+ * This makes the schema validation more lenient
+ */
+export function preprocessAnalyzeResponse(data: unknown): unknown {
+  if (typeof data !== 'object' || data === null) {
+    return data;
+  }
+
+  const obj = data as Record<string, unknown>;
+
+  // Normalize readability
+  if (obj.readability && typeof obj.readability === 'object') {
+    const readability = obj.readability as Record<string, unknown>;
+    if (typeof readability.overall === 'string') {
+      readability.overall = normalizeReadability(readability.overall);
+    }
+    if (!Array.isArray(readability.issues)) {
+      readability.issues = [];
+    }
+    if (typeof readability.needsRetake !== 'boolean') {
+      readability.needsRetake = false;
+    }
+  }
+
+  // Default top-level fields
+  if (typeof obj.menuLanguage !== 'string') {
+    obj.menuLanguage = 'Unknown';
+  }
+  if (obj.restaurantName === undefined) {
+    obj.restaurantName = null;
+  }
+  if (typeof obj.translatedMenuPreview !== 'string') {
+    obj.translatedMenuPreview = '';
+  }
+  if (!Array.isArray(obj.evidenceSnippets)) {
+    obj.evidenceSnippets = [];
+  }
+
+  // Normalize recommendations
+  if (Array.isArray(obj.recommendations)) {
+    obj.recommendations = obj.recommendations.map((rec: unknown, index: number) => {
+      if (typeof rec !== 'object' || rec === null) {
+        return rec;
+      }
+      const r = rec as Record<string, unknown>;
+
+      // Default id if missing
+      if (typeof r.id !== 'string') {
+        r.id = `rec-${index + 1}`;
+      }
+
+      // Default localizedEquivalent
+      if (r.localizedEquivalent === undefined) {
+        r.localizedEquivalent = null;
+      }
+
+      // Default arrays
+      if (!Array.isArray(r.tasteProfile)) {
+        r.tasteProfile = [];
+      }
+      if (!Array.isArray(r.warnings)) {
+        r.warnings = [];
+      }
+
+      // Default imagePrompt
+      if (typeof r.imagePrompt !== 'string') {
+        r.imagePrompt = '';
+      }
+
+      // Normalize reasons
+      if (r.reasons && typeof r.reasons === 'object') {
+        const reasons = r.reasons as Record<string, unknown>;
+        const reasonFields = ['localSpecialty', 'tasteDescription', 'history', 'publicReviews', 'userPreferenceMatch', 'ingredients'];
+        for (const field of reasonFields) {
+          if (typeof reasons[field] !== 'string') {
+            reasons[field] = '';
+          }
+        }
+      } else {
+        r.reasons = {
+          localSpecialty: '',
+          tasteDescription: '',
+          history: '',
+          publicReviews: '',
+          userPreferenceMatch: '',
+          ingredients: '',
+        };
+      }
+
+      return r;
+    });
+  } else {
+    obj.recommendations = [];
+  }
+
+  return obj;
+}
 
 /**
  * Response from /api/generate-image
