@@ -106,7 +106,7 @@ export function Results({ data }: ResultsProps) {
 
         {/* All Dishes from Menu (collapsible) */}
         {allDishes && allDishes.length > 0 && (
-          <Collapse title={`All Menu Items (${allDishes.length})`} defaultOpen={false}>
+          <Collapse title={`All Menu Items (${allDishes.length})`} defaultOpen={true}>
             <div className="space-y-2">
               {allDishes.map((dish, i) => (
                 <div
