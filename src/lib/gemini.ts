@@ -61,17 +61,17 @@ export async function generateDishImage(
     return { imageUrl: getMockImageDataUrl(), cached: false };
   }
 
-  safeLog.info('Starting image generation with Gemini 2.5 Flash');
+  safeLog.info('Starting image generation with Gemini 2.0 Flash Exp');
 
   const client = createClient();
 
   try {
-    // Use Gemini 2.5 Flash with image generation capability
-    // Model: gemini-2.5-flash-preview-05-20 with responseModalities: ["TEXT", "IMAGE"]
+    // Use Gemini 2.0 Flash Experimental with native image generation capability
+    // See: https://ai.google.dev/gemini-api/docs/image-generation
     const model = client.getGenerativeModel({
-      model: 'gemini-2.5-flash-preview-05-20',
+      model: 'gemini-2.0-flash-exp',
       generationConfig: {
-        responseModalities: ['TEXT', 'IMAGE'],
+        responseModalities: ['IMAGE', 'TEXT'],
       } as any,
     });
 
@@ -104,34 +104,7 @@ export async function generateDishImage(
       }
     }
 
-    // If primary model didn't return image, try alternative model
-    safeLog.warn('No inline image in response, trying alternative model');
-
-    // Try with gemini-2.0-flash-exp as fallback
-    const fallbackModel = client.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
-      generationConfig: {
-        responseModalities: ['IMAGE', 'TEXT'],
-      } as any,
-    });
-
-    const fallbackResponse = await fallbackModel.generateContent(fullPrompt);
-    const fallbackResult = fallbackResponse.response;
-    const fallbackParts = fallbackResult.candidates?.[0]?.content?.parts;
-
-    if (fallbackParts) {
-      for (const part of fallbackParts) {
-        if (part.inlineData && part.inlineData.mimeType?.startsWith('image/')) {
-          const imageData = Buffer.from(part.inlineData.data, 'base64');
-          const cachedUrl = cacheImage(imagePrompt, imageData);
-
-          safeLog.info('Image generated with fallback model and cached');
-          return { imageUrl: cachedUrl, cached: false };
-        }
-      }
-    }
-
-    throw new Error('No image data in Gemini response');
+    throw new Error('No image data in Gemini response. The model may not have generated an image for this prompt.');
   } catch (error) {
     // Log the full error details for debugging
     const errorDetails = {
