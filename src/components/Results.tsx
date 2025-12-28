@@ -3,7 +3,7 @@
 import { Collapse } from './ui';
 import { RecommendationCard } from './RecommendationCard';
 import type { AnalyzeResponse } from '@/lib/validators';
-import { AlertTriangle, Eye, Store, HelpCircle } from 'lucide-react';
+import { AlertTriangle, Eye, Store, HelpCircle, UtensilsCrossed } from 'lucide-react';
 
 export interface ResultsProps {
   data: AnalyzeResponse;
@@ -13,7 +13,7 @@ export interface ResultsProps {
  * Results section displaying menu analysis and recommendations
  */
 export function Results({ data }: ResultsProps) {
-  const { menuLanguage, restaurantName, translatedMenuPreview, readability, evidenceSnippets, recommendations } = data;
+  const { menuLanguage, restaurantName, translatedMenuPreview, readability, allDishes, recommendations } = data;
 
   return (
     <div className="space-y-8">
@@ -104,23 +104,44 @@ export function Results({ data }: ResultsProps) {
           </div>
         </Collapse>
 
-        {/* Evidence Snippets (collapsible) */}
-        {evidenceSnippets.length > 0 && (
-          <Collapse title="Detected Text Snippets" defaultOpen={false}>
-            <div className="flex flex-wrap gap-2">
-              {evidenceSnippets.map((snippet, i) => (
-                <span
+        {/* All Dishes from Menu (collapsible) */}
+        {allDishes && allDishes.length > 0 && (
+          <Collapse title={`All Menu Items (${allDishes.length})`} defaultOpen={false}>
+            <div className="space-y-2">
+              {allDishes.map((dish, i) => (
+                <div
                   key={i}
-                  className="
-                    px-3 py-1.5
-                    text-xs
-                    bg-neutral-100 text-neutral-600
-                    rounded-lg
-                    font-mono
-                  "
+                  className="flex items-start justify-between gap-3 py-2 border-b border-neutral-100 last:border-0"
                 >
-                  {snippet}
-                </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <UtensilsCrossed className="w-3.5 h-3.5 text-neutral-400 flex-shrink-0" />
+                      <p className="text-sm font-medium text-neutral-900 truncate">
+                        {dish.translatedName}
+                      </p>
+                    </div>
+                    <p className="text-xs text-neutral-500 ml-5.5 truncate">
+                      {dish.originalName}
+                    </p>
+                    {dish.category && (
+                      <span className="text-xs text-neutral-400 ml-5.5">
+                        {dish.category}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    {dish.priceConverted && (
+                      <p className="text-sm font-medium text-neutral-900">
+                        {dish.priceConverted}
+                      </p>
+                    )}
+                    {dish.priceOriginal && (
+                      <p className="text-xs text-neutral-500">
+                        {dish.priceOriginal}
+                      </p>
+                    )}
+                  </div>
+                </div>
               ))}
             </div>
           </Collapse>
