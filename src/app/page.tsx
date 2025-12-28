@@ -27,6 +27,7 @@ export default function HomePage() {
     budget: ['medium'], // Now an array for multi-select
     adventurousness: 'medium',
     targetLanguage: 'en',
+    currentLocation: 'MX', // Default to Mexico
   });
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState<AnalyzeResponse | null>(null);

@@ -60,6 +60,28 @@ const languages = [
   { code: 'vi', label: 'Tiếng Việt (Vietnamese)' },
 ];
 
+// Location options (current country you're visiting)
+const locations = [
+  { code: 'MX', label: '🇲🇽 Mexico (MXN)', currency: 'MXN' },
+  { code: 'US', label: '🇺🇸 United States (USD)', currency: 'USD' },
+  { code: 'CN', label: '🇨🇳 China (CNY)', currency: 'CNY' },
+  { code: 'JP', label: '🇯🇵 Japan (JPY)', currency: 'JPY' },
+  { code: 'KR', label: '🇰🇷 South Korea (KRW)', currency: 'KRW' },
+  { code: 'TW', label: '🇹🇼 Taiwan (TWD)', currency: 'TWD' },
+  { code: 'TH', label: '🇹🇭 Thailand (THB)', currency: 'THB' },
+  { code: 'VN', label: '🇻🇳 Vietnam (VND)', currency: 'VND' },
+  { code: 'FR', label: '🇫🇷 France (EUR)', currency: 'EUR' },
+  { code: 'DE', label: '🇩🇪 Germany (EUR)', currency: 'EUR' },
+  { code: 'IT', label: '🇮🇹 Italy (EUR)', currency: 'EUR' },
+  { code: 'ES', label: '🇪🇸 Spain (EUR)', currency: 'EUR' },
+  { code: 'GB', label: '🇬🇧 United Kingdom (GBP)', currency: 'GBP' },
+  { code: 'BR', label: '🇧🇷 Brazil (BRL)', currency: 'BRL' },
+  { code: 'AU', label: '🇦🇺 Australia (AUD)', currency: 'AUD' },
+  { code: 'CA', label: '🇨🇦 Canada (CAD)', currency: 'CAD' },
+  { code: 'IN', label: '🇮🇳 India (INR)', currency: 'INR' },
+  { code: 'RU', label: '🇷🇺 Russia (RUB)', currency: 'RUB' },
+];
+
 // Dietary restriction options
 const dietaryOptions = [
   'vegetarian',
@@ -161,6 +183,34 @@ export function PreferencesForm({
       {/* Expanded Options */}
       <Collapse title="Advanced Preferences" defaultOpen={false}>
         <div className="space-y-6">
+          {/* Current Location */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Current Location (for price conversion)
+            </label>
+            <select
+              value={preferences.currentLocation}
+              onChange={(e) => handleChange('currentLocation', e.target.value)}
+              disabled={disabled}
+              className="
+                w-full px-4 py-3
+                bg-white border border-neutral-200 rounded-xl
+                text-neutral-900
+                focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:border-transparent
+                disabled:opacity-50 disabled:cursor-not-allowed
+                appearance-none
+                bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23737373%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')]
+                bg-[length:20px] bg-[center_right_12px] bg-no-repeat
+              "
+            >
+              {locations.map((loc) => (
+                <option key={loc.code} value={loc.code}>
+                  {loc.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Target Language */}
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">

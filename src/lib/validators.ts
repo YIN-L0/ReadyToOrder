@@ -14,6 +14,7 @@ export const PreferencesSchema = z.object({
   budget: z.array(z.enum(['low', 'medium', 'high'])).default(['medium']), // Multi-select budget
   adventurousness: z.enum(['low', 'medium', 'high']).default('medium'),
   targetLanguage: z.string().default('zh-CN'),
+  currentLocation: z.string().default('MX'), // 当前所在国家/地区代码
 });
 
 export type Preferences = z.infer<typeof PreferencesSchema>;

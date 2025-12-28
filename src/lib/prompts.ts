@@ -106,7 +106,7 @@ LANGUAGE OUTPUT RULES (CRITICAL):
  * User prompt for menu analysis with preferences
  */
 export function getMenuAnalysisUserPrompt(preferences: Preferences): string {
-  const { spicyLevel, dietaryRestrictions, dislikedIngredients, budget, adventurousness, targetLanguage } = preferences;
+  const { spicyLevel, dietaryRestrictions, dislikedIngredients, budget, adventurousness, targetLanguage, currentLocation } = preferences;
 
   const dietaryText = dietaryRestrictions.length > 0
     ? `Dietary restrictions: ${dietaryRestrictions.join(', ')}.`
@@ -130,20 +130,46 @@ export function getMenuAnalysisUserPrompt(preferences: Preferences): string {
     high: 'loves adventurous, unique dishes - local specialties, unusual ingredients, authentic local flavors',
   };
 
-  // Map target language to currency for price conversion
-  const currencyMap: Record<string, { currency: string; symbol: string; rate: string }> = {
-    'zh-CN': { currency: 'CNY', symbol: '¥', rate: '~7.2 CNY per USD, ~0.42 CNY per MXN peso' },
-    'zh-TW': { currency: 'TWD', symbol: 'NT$', rate: '~32 TWD per USD, ~1.9 TWD per MXN peso' },
-    'en': { currency: 'USD', symbol: '$', rate: '~1 USD per 17 MXN pesos, ~0.14 USD per CNY' },
-    'ja': { currency: 'JPY', symbol: '¥', rate: '~150 JPY per USD, ~8.8 JPY per MXN peso' },
-    'ko': { currency: 'KRW', symbol: '₩', rate: '~1350 KRW per USD, ~79 KRW per MXN peso' },
-    'fr': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
-    'de': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
-    'es': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
-    'it': { currency: 'EUR', symbol: '€', rate: '~0.92 EUR per USD, ~0.054 EUR per MXN peso' },
-    'pt': { currency: 'BRL', symbol: 'R$', rate: '~5 BRL per USD, ~0.29 BRL per MXN peso' },
+  // Map location code to source currency (where user is currently located)
+  const locationCurrencyMap: Record<string, { currency: string; symbol: string }> = {
+    'MX': { currency: 'MXN', symbol: '$' },
+    'US': { currency: 'USD', symbol: '$' },
+    'CN': { currency: 'CNY', symbol: '¥' },
+    'JP': { currency: 'JPY', symbol: '¥' },
+    'KR': { currency: 'KRW', symbol: '₩' },
+    'TW': { currency: 'TWD', symbol: 'NT$' },
+    'TH': { currency: 'THB', symbol: '฿' },
+    'VN': { currency: 'VND', symbol: '₫' },
+    'FR': { currency: 'EUR', symbol: '€' },
+    'DE': { currency: 'EUR', symbol: '€' },
+    'IT': { currency: 'EUR', symbol: '€' },
+    'ES': { currency: 'EUR', symbol: '€' },
+    'GB': { currency: 'GBP', symbol: '£' },
+    'BR': { currency: 'BRL', symbol: 'R$' },
+    'AU': { currency: 'AUD', symbol: 'A$' },
+    'CA': { currency: 'CAD', symbol: 'C$' },
+    'IN': { currency: 'INR', symbol: '₹' },
+    'RU': { currency: 'RUB', symbol: '₽' },
   };
-  const targetCurrency = currencyMap[targetLanguage] || currencyMap['en'];
+  const sourceCurrency = locationCurrencyMap[currentLocation] || locationCurrencyMap['MX'];
+
+  // Map target language to user's home currency (for conversion)
+  const targetCurrencyMap: Record<string, { currency: string; symbol: string }> = {
+    'zh-CN': { currency: 'CNY', symbol: '¥' },
+    'zh-TW': { currency: 'TWD', symbol: 'NT$' },
+    'en': { currency: 'USD', symbol: '$' },
+    'ja': { currency: 'JPY', symbol: '¥' },
+    'ko': { currency: 'KRW', symbol: '₩' },
+    'fr': { currency: 'EUR', symbol: '€' },
+    'de': { currency: 'EUR', symbol: '€' },
+    'es': { currency: 'EUR', symbol: '€' },
+    'it': { currency: 'EUR', symbol: '€' },
+    'pt': { currency: 'BRL', symbol: 'R$' },
+    'ru': { currency: 'RUB', symbol: '₽' },
+    'th': { currency: 'THB', symbol: '฿' },
+    'vi': { currency: 'VND', symbol: '₫' },
+  };
+  const targetCurrency = targetCurrencyMap[targetLanguage] || targetCurrencyMap['en'];
 
   return `Analyze this menu image and provide personalized dish recommendations.
 
@@ -156,10 +182,11 @@ MENU EXTRACTION INSTRUCTIONS:
 4. From the complete list of dishes, select the TOP 3 that best match user preferences.
 
 PRICE CONVERSION:
-- For each dish, provide BOTH the original price AND the converted price in the user's currency.
-- User's target currency: ${targetCurrency.currency} (${targetCurrency.symbol})
-- Conversion rates: ${targetCurrency.rate}
-- Format: "priceOriginal" = exact price from menu, "priceConverted" = "${targetCurrency.symbol}XX.XX" (approximate conversion)
+- For each dish, provide BOTH the original price AND the converted price in the user's home currency.
+- Menu prices are in: ${sourceCurrency.currency} (${sourceCurrency.symbol}) - this is where the user is currently located
+- Convert to user's home currency: ${targetCurrency.currency} (${targetCurrency.symbol})
+- Use current exchange rates to convert from ${sourceCurrency.currency} to ${targetCurrency.currency}
+- Format: "priceOriginal" = exact price from menu in ${sourceCurrency.currency}, "priceConverted" = "${targetCurrency.symbol}XX.XX" (approximate conversion to ${targetCurrency.currency})
 
 USER PREFERENCES:
 - Spicy tolerance: ${spicyLevel}/5 (0=no spice, 5=very spicy is fine)
@@ -184,8 +211,8 @@ Respond with ONLY valid JSON in this exact format:
     {
       "originalName": "complete dish name in original language (e.g., Pulpo a la diabla)",
       "translatedName": "translated dish name (e.g., Spicy Devil Octopus)",
-      "priceOriginal": "exact price from menu (e.g., $280.00 MXN)",
-      "priceConverted": "converted price in user's currency (e.g., ${targetCurrency.symbol}117.60)",
+      "priceOriginal": "exact price from menu in ${sourceCurrency.currency} (e.g., ${sourceCurrency.symbol}280.00)",
+      "priceConverted": "converted price in ${targetCurrency.currency} (e.g., ${targetCurrency.symbol}XX.XX)",
       "category": "menu category if applicable (e.g., Seafood, Appetizers)"
     }
   ],
@@ -194,8 +221,8 @@ Respond with ONLY valid JSON in this exact format:
       "id": "unique-id-1",
       "dishOriginal": "original name in source language",
       "dishTranslated": "translated name in target language",
-      "priceOriginal": "exact price from menu (e.g., $280.00 MXN)",
-      "priceConverted": "converted price in user's currency (e.g., ${targetCurrency.symbol}117.60)",
+      "priceOriginal": "exact price from menu in ${sourceCurrency.currency} (e.g., ${sourceCurrency.symbol}280.00)",
+      "priceConverted": "converted price in ${targetCurrency.currency} (e.g., ${targetCurrency.symbol}XX.XX)",
       "localizedEquivalent": "cultural equivalent from user's cuisine, or null (in target language)",
       "tasteProfile": ["savory", "umami", "mild"],
       "reasons": {

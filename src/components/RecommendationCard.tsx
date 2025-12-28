@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   Sparkles,
   RefreshCw,
   Share2,
   AlertTriangle,
   Check,
-  Loader2,
   MapPin,
   Utensils,
   BookOpen,
@@ -146,7 +146,13 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
         {imageLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-neutral-100/80">
             <div className="text-center">
-              <Loader2 className="w-8 h-8 text-neutral-600 animate-spin mx-auto mb-2" />
+              <Image
+                src="/cat6.png"
+                alt="Generating..."
+                width={64}
+                height={64}
+                className="mx-auto mb-2 animate-bounce"
+              />
               <p className="text-sm text-neutral-600">Generating image...</p>
             </div>
           </div>
