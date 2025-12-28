@@ -41,7 +41,8 @@ function getMockImageDataUrl(): string {
 }
 
 /**
- * Generate a dish image using Gemini Imagen
+ * Generate a dish image using Gemini 2.5 Flash Image model
+ * Uses the gemini-2.5-flash-preview-05-20 model with image generation capability
  */
 export async function generateDishImage(
   imagePrompt: string
@@ -60,20 +61,23 @@ export async function generateDishImage(
     return { imageUrl: getMockImageDataUrl(), cached: false };
   }
 
-  safeLog.info('Starting image generation with Gemini');
+  safeLog.info('Starting image generation with Gemini 2.5 Flash');
 
   const client = createClient();
 
   try {
-    // Use Gemini's image generation model
+    // Use Gemini 2.5 Flash with image generation capability
+    // Model: gemini-2.5-flash-preview-05-20 with responseModalities: ["TEXT", "IMAGE"]
     const model = client.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash-preview-05-20',
       generationConfig: {
-        responseModalities: ['image', 'text'] as any,
+        responseModalities: ['TEXT', 'IMAGE'],
       } as any,
     });
 
     const fullPrompt = getDishImagePrompt(imagePrompt);
+
+    safeLog.debug('Generating image with prompt', { promptPreview: fullPrompt.substring(0, 100) });
 
     const response = await model.generateContent(fullPrompt);
     const result = response.response;
@@ -89,7 +93,7 @@ export async function generateDishImage(
       throw new Error('No parts in Gemini response');
     }
 
-    // Look for inline image data
+    // Look for inline image data in response parts
     for (const part of parts) {
       if (part.inlineData && part.inlineData.mimeType?.startsWith('image/')) {
         const imageData = Buffer.from(part.inlineData.data, 'base64');
@@ -100,26 +104,31 @@ export async function generateDishImage(
       }
     }
 
-    // If no inline image, try to use text-based image generation
-    // Fall back to using Imagen 3 model if available
-    safeLog.warn('No inline image in response, trying Imagen model');
+    // If primary model didn't return image, try alternative model
+    safeLog.warn('No inline image in response, trying alternative model');
 
-    const imagenModel = client.getGenerativeModel({ model: 'imagen-3.0-generate-002' });
-
-    const imagenResponse = await (imagenModel as any).generateImages({
-      prompt: fullPrompt,
-      numberOfImages: 1,
-      aspectRatio: '1:1',
-      safetyFilterLevel: 'block_few',
+    // Try with gemini-2.0-flash-exp as fallback
+    const fallbackModel = client.getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      generationConfig: {
+        responseModalities: ['IMAGE', 'TEXT'],
+      } as any,
     });
 
-    if (imagenResponse.images && imagenResponse.images.length > 0) {
-      const imageBase64 = imagenResponse.images[0].bytesBase64Encoded;
-      const imageData = Buffer.from(imageBase64, 'base64');
-      const cachedUrl = cacheImage(imagePrompt, imageData);
+    const fallbackResponse = await fallbackModel.generateContent(fullPrompt);
+    const fallbackResult = fallbackResponse.response;
+    const fallbackParts = fallbackResult.candidates?.[0]?.content?.parts;
 
-      safeLog.info('Image generated with Imagen and cached successfully');
-      return { imageUrl: cachedUrl, cached: false };
+    if (fallbackParts) {
+      for (const part of fallbackParts) {
+        if (part.inlineData && part.inlineData.mimeType?.startsWith('image/')) {
+          const imageData = Buffer.from(part.inlineData.data, 'base64');
+          const cachedUrl = cacheImage(imagePrompt, imageData);
+
+          safeLog.info('Image generated with fallback model and cached');
+          return { imageUrl: cachedUrl, cached: false };
+        }
+      }
     }
 
     throw new Error('No image data in Gemini response');
@@ -128,14 +137,17 @@ export async function generateDishImage(
 
     // Handle specific error types
     if (error instanceof Error) {
-      if (error.message.includes('API_KEY')) {
+      if (error.message.includes('API_KEY') || error.message.includes('401')) {
         throw new Error('Invalid Gemini API key. Please check your configuration.');
       }
-      if (error.message.includes('SAFETY')) {
+      if (error.message.includes('SAFETY') || error.message.includes('blocked')) {
         throw new Error('Image generation blocked by safety filters. Try a different dish.');
       }
-      if (error.message.includes('quota') || error.message.includes('rate')) {
+      if (error.message.includes('quota') || error.message.includes('rate') || error.message.includes('429')) {
         throw new Error('Rate limit exceeded. Please try again in a moment.');
+      }
+      if (error.message.includes('not found') || error.message.includes('404')) {
+        throw new Error('Image generation model not available. Please try again later.');
       }
     }
 

@@ -3,7 +3,7 @@
 import { Collapse } from './ui';
 import { RecommendationCard } from './RecommendationCard';
 import type { AnalyzeResponse } from '@/lib/validators';
-import { AlertTriangle, Eye } from 'lucide-react';
+import { AlertTriangle, Eye, Store, HelpCircle } from 'lucide-react';
 
 export interface ResultsProps {
   data: AnalyzeResponse;
@@ -13,10 +13,30 @@ export interface ResultsProps {
  * Results section displaying menu analysis and recommendations
  */
 export function Results({ data }: ResultsProps) {
-  const { menuLanguage, translatedMenuPreview, readability, evidenceSnippets, recommendations } = data;
+  const { menuLanguage, restaurantName, translatedMenuPreview, readability, evidenceSnippets, recommendations } = data;
 
   return (
     <div className="space-y-8">
+      {/* Restaurant Name */}
+      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-subtle">
+        <div className="flex items-center gap-3">
+          <Store className="w-5 h-5 text-neutral-400" />
+          <div>
+            <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              Restaurant
+            </p>
+            {restaurantName ? (
+              <p className="text-lg font-semibold text-neutral-900">{restaurantName}</p>
+            ) : (
+              <p className="text-sm text-neutral-500 flex items-center gap-1">
+                <HelpCircle className="w-3.5 h-3.5" />
+                Unable to detect restaurant name from menu
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Readability Warning */}
       {readability.needsRetake && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">

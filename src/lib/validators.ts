@@ -11,7 +11,7 @@ export const PreferencesSchema = z.object({
   spicyLevel: z.number().min(0).max(5).default(2),
   dietaryRestrictions: z.array(z.string()).default([]),
   dislikedIngredients: z.string().default(''),
-  budget: z.enum(['low', 'medium', 'high']).default('medium'),
+  budget: z.array(z.enum(['low', 'medium', 'high'])).default(['medium']), // Multi-select budget
   adventurousness: z.enum(['low', 'medium', 'high']).default('medium'),
   targetLanguage: z.string().default('zh-CN'),
 });
@@ -66,15 +66,28 @@ export const ReadabilitySchema = z.object({
 export type Readability = z.infer<typeof ReadabilitySchema>;
 
 /**
+ * Detailed recommendation reasons
+ */
+export const RecommendationReasonsSchema = z.object({
+  localSpecialty: z.string(), // 当地特色和受欢迎程度
+  tasteDescription: z.string(), // 口感和口味描述
+  history: z.string(), // 简要历史介绍
+  publicReviews: z.string(), // 网上大家的评论
+  userPreferenceMatch: z.string(), // 与用户选择的匹配
+  ingredients: z.string(), // 菜的组成部分（基于菜单）
+});
+
+export type RecommendationReasons = z.infer<typeof RecommendationReasonsSchema>;
+
+/**
  * Single dish recommendation
  */
 export const RecommendationSchema = z.object({
   id: z.string(),
   dishOriginal: z.string(),
   dishTranslated: z.string(),
-  confidence: z.number().min(0).max(100),
   tasteProfile: z.array(z.string()),
-  why: z.array(z.string()),
+  reasons: RecommendationReasonsSchema, // Detailed reasons
   warnings: z.array(z.string()),
   imagePrompt: z.string(),
 });
@@ -86,6 +99,7 @@ export type Recommendation = z.infer<typeof RecommendationSchema>;
  */
 export const AnalyzeResponseSchema = z.object({
   menuLanguage: z.string(),
+  restaurantName: z.string().nullable(), // 餐厅名字，null表示未识别
   translatedMenuPreview: z.string(),
   readability: ReadabilitySchema,
   evidenceSnippets: z.array(z.string()),

@@ -8,8 +8,14 @@ import {
   AlertTriangle,
   Check,
   Loader2,
+  MapPin,
+  Utensils,
+  BookOpen,
+  MessageSquare,
+  Heart,
+  ChefHat,
 } from 'lucide-react';
-import { Button, ImageSkeleton } from './ui';
+import { Button, ImageSkeleton, Collapse } from './ui';
 import type { Recommendation, GenerateImageResponse } from '@/lib/validators';
 
 export interface RecommendationCardProps {
@@ -60,11 +66,17 @@ export function RecommendationCard({
   };
 
   const handleShare = async () => {
+    const { reasons } = recommendation;
     const text = `🍽️ ${recommendation.dishTranslated}
 (${recommendation.dishOriginal})
 
-✨ Why I'd recommend it:
-${recommendation.why.map((w) => `• ${w}`).join('\n')}
+📍 ${reasons.localSpecialty}
+
+😋 Taste: ${reasons.tasteDescription}
+
+📖 History: ${reasons.history}
+
+🥗 Ingredients: ${reasons.ingredients}
 
 ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.join(', ')}` : ''}
 
@@ -75,7 +87,6 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback for older browsers
       const textarea = document.createElement('textarea');
       textarea.value = text;
       document.body.appendChild(textarea);
@@ -87,12 +98,7 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
     }
   };
 
-  // Confidence color
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 80) return 'text-green-600';
-    if (confidence >= 60) return 'text-amber-600';
-    return 'text-red-500';
-  };
+  const { reasons } = recommendation;
 
   return (
     <article className="bg-white rounded-2xl shadow-soft overflow-hidden">
@@ -171,7 +177,7 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
         </div>
 
         {/* Taste Profile Tags */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-5">
           {recommendation.tasteProfile.map((taste, i) => (
             <span
               key={i}
@@ -187,19 +193,78 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
           ))}
         </div>
 
-        {/* Reasons */}
-        <div className="mb-4">
-          <ul className="space-y-2">
-            {recommendation.why.map((reason, i) => (
-              <li
-                key={i}
-                className="flex items-start text-sm text-neutral-700"
-              >
-                <span className="flex-shrink-0 w-1.5 h-1.5 mt-2 mr-3 bg-neutral-400 rounded-full" />
-                {reason}
-              </li>
-            ))}
-          </ul>
+        {/* Detailed Reasons */}
+        <div className="space-y-4 mb-5">
+          {/* Local Specialty */}
+          <div className="flex items-start gap-3">
+            <MapPin className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">
+                Local Specialty
+              </p>
+              <p className="text-sm text-neutral-700">{reasons.localSpecialty}</p>
+            </div>
+          </div>
+
+          {/* Taste Description */}
+          <div className="flex items-start gap-3">
+            <Utensils className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">
+                Taste & Texture
+              </p>
+              <p className="text-sm text-neutral-700">{reasons.tasteDescription}</p>
+            </div>
+          </div>
+
+          {/* Ingredients */}
+          <div className="flex items-start gap-3">
+            <ChefHat className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">
+                Ingredients
+              </p>
+              <p className="text-sm text-neutral-700">{reasons.ingredients}</p>
+            </div>
+          </div>
+
+          {/* Why It Matches You */}
+          <div className="flex items-start gap-3">
+            <Heart className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">
+                Why This Matches You
+              </p>
+              <p className="text-sm text-neutral-700">{reasons.userPreferenceMatch}</p>
+            </div>
+          </div>
+
+          {/* Collapsible: History & Reviews */}
+          <Collapse title="History & Reviews" defaultOpen={false}>
+            <div className="space-y-4">
+              {/* History */}
+              <div className="flex items-start gap-3">
+                <BookOpen className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">
+                    History
+                  </p>
+                  <p className="text-sm text-neutral-700">{reasons.history}</p>
+                </div>
+              </div>
+
+              {/* Public Reviews */}
+              <div className="flex items-start gap-3">
+                <MessageSquare className="w-4 h-4 text-neutral-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1">
+                    What People Say
+                  </p>
+                  <p className="text-sm text-neutral-700">{reasons.publicReviews}</p>
+                </div>
+              </div>
+            </div>
+          </Collapse>
         </div>
 
         {/* Warnings */}
@@ -219,17 +284,8 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
           </div>
         )}
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
-          {/* Confidence */}
-          <div className="text-sm">
-            <span className="text-neutral-500">Confidence: </span>
-            <span className={`font-semibold ${getConfidenceColor(recommendation.confidence)}`}>
-              {recommendation.confidence}%
-            </span>
-          </div>
-
-          {/* Actions */}
+        {/* Footer - Actions only */}
+        <div className="flex items-center justify-end pt-4 border-t border-neutral-100">
           <div className="flex items-center gap-2">
             {/* Regenerate button (only if generated before) */}
             {hasGeneratedOnce && !imageLoading && (

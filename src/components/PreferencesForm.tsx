@@ -263,33 +263,49 @@ export function PreferencesForm({
             />
           </div>
 
-          {/* Budget */}
+          {/* Budget (Multi-select) */}
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-3">
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
               Budget Preference
             </label>
+            <p className="text-xs text-neutral-500 mb-3">Select one or more price ranges</p>
             <div className="flex gap-2">
-              {(['low', 'medium', 'high'] as const).map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => handleChange('budget', level)}
-                  disabled={disabled}
-                  className={`
-                    flex-1 py-3 px-4 rounded-xl
-                    text-sm font-medium capitalize
-                    transition-all duration-200
-                    border
-                    ${preferences.budget === level
-                      ? 'bg-neutral-900 text-white border-neutral-900'
-                      : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
-                    }
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                  `}
-                >
-                  {level === 'low' ? '$' : level === 'medium' ? '$$' : '$$$'}
-                </button>
-              ))}
+              {(['low', 'medium', 'high'] as const).map((level) => {
+                const isSelected = preferences.budget.includes(level);
+                return (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => {
+                      const current = preferences.budget;
+                      let newBudget: ('low' | 'medium' | 'high')[];
+                      if (isSelected) {
+                        // Remove, but keep at least one selected
+                        newBudget = current.filter((b) => b !== level);
+                        if (newBudget.length === 0) newBudget = [level];
+                      } else {
+                        // Add
+                        newBudget = [...current, level];
+                      }
+                      handleChange('budget', newBudget);
+                    }}
+                    disabled={disabled}
+                    className={`
+                      flex-1 py-3 px-4 rounded-xl
+                      text-sm font-medium capitalize
+                      transition-all duration-200
+                      border
+                      ${isSelected
+                        ? 'bg-neutral-900 text-white border-neutral-900'
+                        : 'bg-white text-neutral-600 border-neutral-200 hover:border-neutral-400'
+                      }
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                    `}
+                  >
+                    {level === 'low' ? '$' : level === 'medium' ? '$$' : '$$$'}
+                  </button>
+                );
+              })}
             </div>
           </div>
 

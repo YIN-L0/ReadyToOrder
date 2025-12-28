@@ -23,7 +23,7 @@ export default function HomePage() {
     spicyLevel: 2,
     dietaryRestrictions: [],
     dislikedIngredients: '',
-    budget: 'medium',
+    budget: ['medium'], // Now an array for multi-select
     adventurousness: 'medium',
     targetLanguage: 'en',
   });
