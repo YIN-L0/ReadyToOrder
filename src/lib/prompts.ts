@@ -28,8 +28,16 @@ ANALYSIS PROCESS:
    - What online reviews typically say about this dish
    - How it matches user preferences
    - Ingredients (based on menu description)
-7. Include any relevant warnings (allergens, spiciness, etc.).
-8. Generate a detailed imagePrompt for each dish (for later image generation).
+7. For each dish, provide a "localizedEquivalent" - a cultural comparison to a similar dish from the user's target language culture:
+   - For Chinese (zh-CN/zh-TW): Compare to Chinese dishes (e.g., "类似煎饼果子", "有点像红烧肉的做法")
+   - For French (fr): Compare to French dishes (e.g., "similaire à une crêpe bretonne")
+   - For Spanish (es): Compare to Spanish/Latin dishes (e.g., "parecido a una tortilla española")
+   - For Japanese (ja): Compare to Japanese dishes (e.g., "お好み焼きに似ている")
+   - For Korean (ko): Compare to Korean dishes (e.g., "파전과 비슷한 요리")
+   - For English or other languages: Provide a familiar Western equivalent if applicable
+   - If no good cultural equivalent exists, set to null
+8. Include any relevant warnings (allergens, spiciness, etc.).
+9. Generate a detailed imagePrompt for each dish (for later image generation).
 
 IMAGE PROMPT GUIDELINES:
 - Create a prompt for a realistic, editorial-style food photograph
@@ -93,6 +101,7 @@ Respond with ONLY valid JSON in this exact format:
       "id": "unique-id-1",
       "dishOriginal": "original name in source language",
       "dishTranslated": "translated name",
+      "localizedEquivalent": "cultural equivalent from user's cuisine (e.g., '类似煎饼果子' for Chinese users), or null if no good equivalent",
       "tasteProfile": ["savory", "umami", "mild"],
       "reasons": {
         "localSpecialty": "Description of whether this is a local specialty, how popular it is locally, and if it's a signature dish of the region/restaurant",
@@ -152,6 +161,7 @@ export function getMockAnalyzeResponse(): object {
         id: "rec-1",
         dishOriginal: "とんこつラーメン",
         dishTranslated: "Tonkotsu Ramen (Pork Bone Broth Ramen)",
+        localizedEquivalent: "类似浓郁版的牛肉面，但用猪骨熬制",
         tasteProfile: ["rich", "savory", "umami", "creamy"],
         reasons: {
           localSpecialty: "Tonkotsu ramen originated in Fukuoka, Japan and is one of the most beloved regional specialties. This restaurant's version is highly popular among locals and tourists alike.",
@@ -168,6 +178,7 @@ export function getMockAnalyzeResponse(): object {
         id: "rec-2",
         dishOriginal: "天ぷら定食",
         dishTranslated: "Tempura Set Meal",
+        localizedEquivalent: "类似炸虾和炸蔬菜拼盘，但面衣更薄更酥脆",
         tasteProfile: ["crispy", "light", "delicate", "savory"],
         reasons: {
           localSpecialty: "Tempura is a quintessential Japanese dish found throughout the country. While not region-specific, high-quality tempura sets are a staple of Japanese dining culture.",
@@ -184,6 +195,7 @@ export function getMockAnalyzeResponse(): object {
         id: "rec-3",
         dishOriginal: "サーモンいくら丼",
         dishTranslated: "Salmon and Salmon Roe Rice Bowl",
+        localizedEquivalent: "类似三文鱼刺身盖饭，配上鱼籽",
         tasteProfile: ["fresh", "oceanic", "buttery", "slightly sweet"],
         reasons: {
           localSpecialty: "This dish is especially popular in Hokkaido, known for its premium salmon and ikura. It showcases the best of Japanese seafood tradition and is a must-try for visitors.",

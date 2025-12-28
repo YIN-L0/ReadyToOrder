@@ -86,6 +86,7 @@ export const RecommendationSchema = z.object({
   id: z.string(),
   dishOriginal: z.string(),
   dishTranslated: z.string(),
+  localizedEquivalent: z.string().nullable(), // 本土化类比描述，例如"类似煎饼果子"
   tasteProfile: z.array(z.string()),
   reasons: RecommendationReasonsSchema, // Detailed reasons
   warnings: z.array(z.string()),

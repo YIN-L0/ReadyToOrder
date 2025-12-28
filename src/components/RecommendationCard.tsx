@@ -174,6 +174,12 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
             {recommendation.dishTranslated}
           </h3>
           <p className="text-sm text-neutral-500">{recommendation.dishOriginal}</p>
+          {/* Localized cultural equivalent */}
+          {recommendation.localizedEquivalent && (
+            <p className="text-sm text-amber-700 mt-1.5 bg-amber-50 px-2.5 py-1 rounded-lg inline-block">
+              💡 {recommendation.localizedEquivalent}
+            </p>
+          )}
         </div>
 
         {/* Taste Profile Tags */}
