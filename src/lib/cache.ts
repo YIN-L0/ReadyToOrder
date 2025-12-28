@@ -1,121 +1,98 @@
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
 import { shortHash } from './hash';
 import { safeLog } from './safeLog';
 
-const CACHE_DIR = join(process.cwd(), '.cache');
-const CACHE_FILE = join(CACHE_DIR, 'images.json');
-const GENERATED_DIR = join(process.cwd(), 'public', 'generated');
+/**
+ * In-memory cache for serverless environments (Vercel)
+ * Images are stored as base64 data URLs
+ */
 
 interface CacheEntry {
   promptHash: string;
-  imagePath: string;
-  createdAt: string;
+  imageDataUrl: string;
+  createdAt: number;
 }
 
-interface CacheData {
-  entries: Record<string, CacheEntry>;
-}
+// In-memory cache (will reset on cold start, but that's acceptable)
+const memoryCache = new Map<string, CacheEntry>();
+
+// Cache TTL: 1 hour (in milliseconds)
+const CACHE_TTL = 60 * 60 * 1000;
 
 /**
- * Ensure cache directories exist
+ * Clean up expired cache entries
  */
-function ensureDirectories(): void {
-  if (!existsSync(CACHE_DIR)) {
-    mkdirSync(CACHE_DIR, { recursive: true });
-  }
-  if (!existsSync(GENERATED_DIR)) {
-    mkdirSync(GENERATED_DIR, { recursive: true });
-  }
-}
-
-/**
- * Load cache data from disk
- */
-function loadCache(): CacheData {
-  ensureDirectories();
-
-  if (!existsSync(CACHE_FILE)) {
-    return { entries: {} };
-  }
-
-  try {
-    const data = readFileSync(CACHE_FILE, 'utf-8');
-    return JSON.parse(data) as CacheData;
-  } catch (error) {
-    safeLog.warn('Failed to load cache, starting fresh');
-    return { entries: {} };
+function cleanupExpiredEntries(): void {
+  const now = Date.now();
+  for (const [hash, entry] of memoryCache.entries()) {
+    if (now - entry.createdAt > CACHE_TTL) {
+      memoryCache.delete(hash);
+      safeLog.debug('Expired cache entry removed', { hash });
+    }
   }
 }
 
 /**
- * Save cache data to disk
- */
-function saveCache(cache: CacheData): void {
-  ensureDirectories();
-  writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2));
-}
-
-/**
- * Get cached image path for a prompt
- * Returns null if not cached
+ * Get cached image for a prompt
+ * Returns null if not cached or expired
  */
 export function getCachedImage(prompt: string): string | null {
+  cleanupExpiredEntries();
+
   const hash = shortHash(prompt);
-  const cache = loadCache();
-  const entry = cache.entries[hash];
+  const entry = memoryCache.get(hash);
 
   if (!entry) {
     return null;
   }
 
-  // Verify the file still exists
-  const fullPath = join(process.cwd(), 'public', entry.imagePath);
-  if (!existsSync(fullPath)) {
-    safeLog.warn('Cached image file not found, removing entry');
-    delete cache.entries[hash];
-    saveCache(cache);
+  // Check if entry has expired
+  if (Date.now() - entry.createdAt > CACHE_TTL) {
+    memoryCache.delete(hash);
     return null;
   }
 
   safeLog.info('Cache hit for image prompt', { hash });
-  return entry.imagePath;
+  return entry.imageDataUrl;
 }
 
 /**
  * Save an image to cache
- * Returns the public URL path
+ * Returns the data URL
  */
 export function cacheImage(prompt: string, imageData: Buffer): string {
-  ensureDirectories();
+  cleanupExpiredEntries();
 
   const hash = shortHash(prompt);
-  const filename = `${hash}.png`;
-  const relativePath = `/generated/${filename}`;
-  const fullPath = join(GENERATED_DIR, filename);
 
-  // Write the image file
-  writeFileSync(fullPath, imageData);
+  // Convert buffer to base64 data URL
+  const base64 = imageData.toString('base64');
+  const imageDataUrl = `data:image/png;base64,${base64}`;
 
-  // Update cache index
-  const cache = loadCache();
-  cache.entries[hash] = {
+  // Store in memory cache
+  memoryCache.set(hash, {
     promptHash: hash,
-    imagePath: relativePath,
-    createdAt: new Date().toISOString(),
-  };
-  saveCache(cache);
+    imageDataUrl,
+    createdAt: Date.now(),
+  });
 
-  safeLog.info('Image cached', { hash, path: relativePath });
-  return relativePath;
+  safeLog.info('Image cached in memory', { hash });
+  return imageDataUrl;
 }
 
 /**
  * Clear all cached images
  */
 export function clearCache(): void {
-  const cache = loadCache();
-  cache.entries = {};
-  saveCache(cache);
+  memoryCache.clear();
   safeLog.info('Cache cleared');
+}
+
+/**
+ * Get cache stats
+ */
+export function getCacheStats(): { size: number; entries: string[] } {
+  return {
+    size: memoryCache.size,
+    entries: Array.from(memoryCache.keys()),
+  };
 }
