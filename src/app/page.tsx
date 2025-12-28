@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Settings, Loader2, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
+import { Settings, AlertCircle } from 'lucide-react';
 import { UploadCard, PreferencesForm, Results } from '@/components';
 import { Button } from '@/components/ui';
 import type { Preferences, AnalyzeResponse } from '@/lib/validators';
@@ -93,10 +94,19 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 bg-neutral-50/80 backdrop-blur-lg border-b border-neutral-100">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
-              Menu Sensei
-            </h1>
+            {/* Logo with cat5 */}
+            <div className="flex items-center gap-2">
+              <Image
+                src="/cat5.png"
+                alt="Menu Sensei Cat"
+                width={36}
+                height={36}
+                className="object-contain"
+              />
+              <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
+                Menu Sensei
+              </h1>
+            </div>
 
             {/* Settings toggle */}
             <button
@@ -223,8 +233,13 @@ export default function HomePage() {
         {isAnalyzing && (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="relative">
-              <div className="w-16 h-16 rounded-full bg-neutral-100 animate-pulse" />
-              <Loader2 className="w-8 h-8 text-neutral-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin" />
+              <Image
+                src="/cat2.png"
+                alt="Loading..."
+                width={80}
+                height={80}
+                className="animate-bounce"
+              />
             </div>
             <p className="text-neutral-600 mt-6 text-center">
               Reading your menu and finding the best dishes...

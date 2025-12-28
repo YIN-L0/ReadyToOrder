@@ -41,3 +41,8 @@ next-env.d.ts
 
 # Generated images
 public/generated/
+
+# Test images
+test*.png
+cat*.png
+!/public/cat*.png
