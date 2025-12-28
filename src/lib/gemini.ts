@@ -42,7 +42,7 @@ function getMockImageDataUrl(): string {
 
 /**
  * Generate a dish image using Gemini 2.5 Flash Image model
- * Uses the gemini-2.5-flash-preview-05-20 model with image generation capability
+ * Uses the gemini-2.5-flash-image model with native image generation capability
  */
 export async function generateDishImage(
   imagePrompt: string
@@ -61,15 +61,15 @@ export async function generateDishImage(
     return { imageUrl: getMockImageDataUrl(), cached: false };
   }
 
-  safeLog.info('Starting image generation with Gemini 2.0 Flash Exp');
+  safeLog.info('Starting image generation with Gemini 2.5 Flash Image');
 
   const client = createClient();
 
   try {
-    // Use Gemini 2.0 Flash Experimental with native image generation capability
+    // Use Gemini 2.5 Flash Image model for native image generation
     // See: https://ai.google.dev/gemini-api/docs/image-generation
     const model = client.getGenerativeModel({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash-image',
       generationConfig: {
         responseModalities: ['IMAGE', 'TEXT'],
       } as any,
