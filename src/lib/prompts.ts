@@ -58,14 +58,14 @@ ANALYSIS PROCESS:
    - REGIONAL WARS: Do different cities/regions claim to be the "true" birthplace? Any friendly rivalries?
    - EACH DISH'S HISTORY MUST BE DISTINCTLY DIFFERENT - avoid generic phrases like "has a long history" or "dates back centuries"
 
-   **publicReviews** (2-3 paragraphs) - MUST INCLUDE SPECIFIC DETAILS:
-   - FAMOUS CRITICS: Quote or reference specific food critics, Michelin guides, or famous food writers if applicable
-   - VIRAL MOMENTS: Has this dish gone viral on TikTok/Instagram? Any specific viral videos or trends?
-   - CELEBRITY ENDORSEMENTS: Have any celebrities publicly praised this dish or this restaurant's version?
-   - COMMON EXPERIENCES: What do first-time eaters typically say? Any "initiation" moments or funny reactions?
-   - CONTROVERSY: Any debates about "authentic" vs "modified" versions? Purist opinions?
-   - COMPARISON RATINGS: How does this restaurant's version compare to others? Any local awards?
-   - AVOID generic reviews like "people love it" - include SPECIFIC praise points and critiques
+   **publicReviews** (2-3 paragraphs) - BASED ON REAL-WORLD FEEDBACK:
+   - GOOGLE/YELP SENTIMENT: Based on your knowledge of how this dish is typically reviewed on Google Reviews, Yelp, TripAdvisor, Dianping (大众点评), etc., summarize the common themes in real user feedback
+   - COMMON PRAISE: What do reviewers typically praise? (e.g., "many Google reviewers mention the tender meat", "Yelp users often highlight the generous portions")
+   - COMMON COMPLAINTS: What are the typical criticisms? (e.g., "some reviewers note the wait time", "a few mention it can be too salty for some tastes")
+   - FIRST-TIMER TIPS: What do experienced reviewers suggest for first-time eaters?
+   - AUTHENTICITY DEBATES: Are there discussions about "authentic" vs "tourist" versions?
+   - SOCIAL MEDIA PRESENCE: Is this dish commonly photographed/shared? Any viral moments you're aware of?
+   - BE HONEST: Base this on your actual knowledge of how this type of dish is reviewed. If you don't have specific review data, describe the typical reception based on the dish's characteristics
 
    **userPreferenceMatch** (1-2 paragraphs):
    - How specifically does this match the user's stated spice tolerance?
@@ -233,7 +233,7 @@ Respond with ONLY valid JSON in this exact format:
         "localSpecialty": "2-3 paragraphs about regional fame, popularity among locals/tourists, famous versions, seasonal availability...",
         "tasteDescription": "2-3 paragraphs about flavors, textures, temperature, aroma, how taste develops, what makes it unique...",
         "history": "2-3 paragraphs with SPECIFIC details: exact origin year/place, inventor's name, legends/myths, famous historical figures who ate it, how it evolved, UNESCO status, film appearances. MUST BE UNIQUE for each dish - NO generic 'long history' phrases!",
-        "publicReviews": "2-3 paragraphs with SPECIFIC details: named critics/guides, viral TikTok/Instagram moments, celebrity endorsements, first-timer reactions, authenticity debates, local awards. AVOID generic 'people love it' - give SPECIFIC praise and critiques!",
+        "publicReviews": "2-3 paragraphs summarizing REAL review sentiment from Google Reviews, Yelp, TripAdvisor, Dianping etc. Include: common praise points, typical complaints, first-timer tips, authenticity debates. Be specific about what reviewers actually say about this type of dish.",
         "userPreferenceMatch": "1-2 paragraphs about how it matches user's spice tolerance, budget, adventurousness, dietary needs...",
         "ingredients": "1-2 paragraphs about main components, sauces, special ingredients, allergens..."
       },
@@ -246,7 +246,7 @@ Respond with ONLY valid JSON in this exact format:
 IMPORTANT CONTENT REQUIREMENTS:
 1. Each "reasons" field must contain RICH, DETAILED content (2-3 paragraphs each for localSpecialty, tasteDescription, history, publicReviews; 1-2 paragraphs for userPreferenceMatch and ingredients).
 2. CRITICAL: The "history" field for EACH dish must be COMPLETELY DIFFERENT and UNIQUE - include specific years, inventor names, legends, and historical figures. Do NOT use generic phrases like "has a rich history" or "dates back to ancient times".
-3. CRITICAL: The "publicReviews" field must include SPECIFIC details - name food critics, mention viral social media moments, celebrity endorsements, and specific praise/complaints. Do NOT use generic phrases like "highly praised" or "popular among diners".
+3. CRITICAL: The "publicReviews" field must reflect REAL review sentiment - summarize what people actually say on Google Reviews, Yelp, TripAdvisor, Dianping (大众点评), etc. Include both praise AND common complaints. Be honest about typical feedback for this type of dish.
 4. Each dish's story should feel like reading a mini Wikipedia article - full of interesting facts and trivia that make each dish memorable and distinct from the others.
 
 CRITICAL - OUTPUT LANGUAGE: Write ALL content in ${targetLanguage}:
