@@ -75,7 +75,19 @@ export default function HomePage() {
         }),
       });
 
-      const data = await response.json();
+      // Try to parse response as JSON, handle non-JSON responses
+      let data;
+      const responseText = await response.text();
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        // Response is not valid JSON - likely a server error
+        console.error('Non-JSON response:', responseText.substring(0, 200));
+        if (response.status === 504 || responseText.includes('timeout')) {
+          throw new Error('Request timed out. The image may be too large or complex. Please try a simpler menu photo.');
+        }
+        throw new Error('Server error occurred. Please try again.');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to analyze menu');
