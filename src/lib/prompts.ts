@@ -91,7 +91,15 @@ IMAGE PROMPT GUIDELINES:
 - Describe the dish's appearance, colors, textures, and presentation
 - Specify "professional food photography, soft natural lighting, shallow depth of field"
 - Do NOT include text, watermarks, or people in the prompt
-- Focus on appetizing presentation on a simple, elegant plate`;
+- Focus on appetizing presentation on a simple, elegant plate
+
+LANGUAGE OUTPUT RULES (CRITICAL):
+- ALL text content in the response MUST be written in the user's target language
+- This includes: translatedName, translatedMenuPreview, localizedEquivalent, ALL fields in "reasons" (localSpecialty, tasteDescription, history, publicReviews, userPreferenceMatch, ingredients), warnings, and category
+- ONLY keep originalName, dishOriginal, evidenceSnippets, and imagePrompt in their original language
+- Example: If target language is French (fr), write all descriptions in French
+- Example: If target language is German (de), write all descriptions in German
+- Example: If target language is Chinese (zh-CN), write all descriptions in Chinese`;
 }
 
 /**
@@ -185,8 +193,10 @@ Respond with ONLY valid JSON in this exact format:
     {
       "id": "unique-id-1",
       "dishOriginal": "original name in source language",
-      "dishTranslated": "translated name",
-      "localizedEquivalent": "cultural equivalent from user's cuisine, or null",
+      "dishTranslated": "translated name in target language",
+      "priceOriginal": "exact price from menu (e.g., $280.00 MXN)",
+      "priceConverted": "converted price in user's currency (e.g., ${targetCurrency.symbol}117.60)",
+      "localizedEquivalent": "cultural equivalent from user's cuisine, or null (in target language)",
       "tasteProfile": ["savory", "umami", "mild"],
       "reasons": {
         "localSpecialty": "2-3 paragraphs about regional fame, popularity among locals/tourists, famous versions, seasonal availability...",
@@ -203,6 +213,12 @@ Respond with ONLY valid JSON in this exact format:
 }
 
 IMPORTANT: Each "reasons" field should contain RICH, DETAILED content (2-3 paragraphs each for localSpecialty, tasteDescription, history, publicReviews; 1-2 paragraphs for userPreferenceMatch and ingredients). Do NOT provide short one-sentence answers.
+
+CRITICAL - OUTPUT LANGUAGE: Write ALL content in ${targetLanguage}:
+- translatedName, translatedMenuPreview, localizedEquivalent: in ${targetLanguage}
+- ALL "reasons" fields (localSpecialty, tasteDescription, history, publicReviews, userPreferenceMatch, ingredients): in ${targetLanguage}
+- warnings and category: in ${targetLanguage}
+- ONLY originalName, dishOriginal, evidenceSnippets, imagePrompt stay in original menu language
 
 Provide exactly 3 recommendations (or fewer if the menu has less). Order by best match to preferences.`;
 }
@@ -292,6 +308,8 @@ export function getMockAnalyzeResponse(): object {
         id: "rec-1",
         dishOriginal: "とんこつラーメン",
         dishTranslated: "Tonkotsu Ramen (Pork Bone Broth Ramen)",
+        priceOriginal: "¥980",
+        priceConverted: "¥47.00",
         localizedEquivalent: "类似浓郁版的牛肉面，但用猪骨熬制",
         tasteProfile: ["rich", "savory", "umami", "creamy"],
         reasons: {
@@ -309,6 +327,8 @@ export function getMockAnalyzeResponse(): object {
         id: "rec-2",
         dishOriginal: "天ぷら定食",
         dishTranslated: "Tempura Set Meal",
+        priceOriginal: "¥1500",
+        priceConverted: "¥72.00",
         localizedEquivalent: "类似炸虾和炸蔬菜拼盘，但面衣更薄更酥脆",
         tasteProfile: ["crispy", "light", "delicate", "savory"],
         reasons: {
@@ -326,6 +346,8 @@ export function getMockAnalyzeResponse(): object {
         id: "rec-3",
         dishOriginal: "サーモンいくら丼",
         dishTranslated: "Salmon and Salmon Roe Rice Bowl",
+        priceOriginal: "¥1800",
+        priceConverted: "¥86.40",
         localizedEquivalent: "类似三文鱼刺身盖饭，配上鱼籽",
         tasteProfile: ["fresh", "oceanic", "buttery", "slightly sweet"],
         reasons: {

@@ -97,6 +97,8 @@ export const RecommendationSchema = z.object({
   id: z.string(),
   dishOriginal: z.string(),
   dishTranslated: z.string(),
+  priceOriginal: z.string().nullable(), // 原始价格（菜单上显示的）
+  priceConverted: z.string().nullable(), // 转换后的价格（用户货币）
   localizedEquivalent: z.string().nullable(), // 本土化类比描述，例如"类似煎饼果子"
   tasteProfile: z.array(z.string()),
   reasons: RecommendationReasonsSchema, // Detailed reasons
@@ -216,6 +218,14 @@ export function preprocessAnalyzeResponse(data: unknown): unknown {
       // Default id if missing
       if (typeof r.id !== 'string') {
         r.id = `rec-${index + 1}`;
+      }
+
+      // Default price fields
+      if (r.priceOriginal === undefined) {
+        r.priceOriginal = null;
+      }
+      if (r.priceConverted === undefined) {
+        r.priceConverted = null;
       }
 
       // Default localizedEquivalent

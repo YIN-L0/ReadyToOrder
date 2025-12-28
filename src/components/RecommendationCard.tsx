@@ -170,13 +170,32 @@ ${recommendation.warnings.length > 0 ? `⚠️ Note: ${recommendation.warnings.j
       <div className="p-5 sm:p-6">
         {/* Header */}
         <div className="mb-4">
-          <h3 className="text-xl sm:text-2xl font-semibold text-neutral-900 mb-1">
-            {recommendation.dishTranslated}
-          </h3>
-          <p className="text-sm text-neutral-500">{recommendation.dishOriginal}</p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <h3 className="text-xl sm:text-2xl font-semibold text-neutral-900 mb-1">
+                {recommendation.dishTranslated}
+              </h3>
+              <p className="text-sm text-neutral-500">{recommendation.dishOriginal}</p>
+            </div>
+            {/* Price display */}
+            {(recommendation.priceOriginal || recommendation.priceConverted) && (
+              <div className="text-right flex-shrink-0">
+                {recommendation.priceConverted && (
+                  <p className="text-lg font-semibold text-neutral-900">
+                    {recommendation.priceConverted}
+                  </p>
+                )}
+                {recommendation.priceOriginal && (
+                  <p className="text-xs text-neutral-500">
+                    {recommendation.priceOriginal}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
           {/* Localized cultural equivalent */}
           {recommendation.localizedEquivalent && (
-            <p className="text-sm text-amber-700 mt-1.5 bg-amber-50 px-2.5 py-1 rounded-lg inline-block">
+            <p className="text-sm text-amber-700 mt-2 bg-amber-50 px-2.5 py-1 rounded-lg inline-block">
               💡 {recommendation.localizedEquivalent}
             </p>
           )}
