@@ -21,19 +21,54 @@ ANALYSIS PROCESS:
 3. Identify the menu language from visible text.
 4. Extract and translate menu items to the target language.
 5. Based on user preferences, select the TOP 3 dishes to recommend.
-6. For each recommendation, provide DETAILED reasons covering:
-   - Local specialty status and popularity
-   - Taste and texture description
-   - Brief historical/cultural background
-   - What online reviews typically say about this dish
-   - How it matches user preferences
-   - Ingredients (based on menu description)
+6. For each recommendation, provide RICH, DETAILED reasons (2-3 paragraphs each) covering:
+
+   **localSpecialty** (2-3 paragraphs):
+   - Is this a signature dish of the region/city? Which area is it most famous in?
+   - How popular is it among locals vs tourists? Is it a must-try?
+   - Any famous restaurants or versions of this dish? Awards or recognition?
+   - Seasonal availability or special occasions when it's traditionally eaten?
+
+   **tasteDescription** (2-3 paragraphs):
+   - Primary flavors: sweet, salty, sour, bitter, umami, spicy?
+   - Texture contrasts: crispy, soft, chewy, creamy, crunchy?
+   - Temperature: served hot, cold, room temperature?
+   - Aroma profile: what does it smell like?
+   - How do the flavors develop as you eat it? First bite vs finish?
+   - What makes this dish's taste unique or memorable?
+
+   **history** (2-3 paragraphs):
+   - When and where did this dish originate?
+   - Who invented it? Any legends or stories?
+   - How has it evolved over time?
+   - Cultural significance: festivals, celebrations, daily life?
+   - Regional variations or family traditions?
+
+   **publicReviews** (2-3 paragraphs):
+   - What do food critics and bloggers say?
+   - Common praise: what do people love most?
+   - Common complaints or things to be aware of?
+   - Social media presence: Instagram-worthy? TikTok famous?
+   - Typical ratings on platforms like Yelp, Google, TripAdvisor?
+
+   **userPreferenceMatch** (1-2 paragraphs):
+   - How specifically does this match the user's stated spice tolerance?
+   - How does it fit their budget preference?
+   - How does it align with their adventurousness level?
+   - Any dietary considerations relevant to their restrictions?
+
+   **ingredients** (1-2 paragraphs):
+   - Main protein, vegetables, carbs?
+   - Key sauces, seasonings, or marinades?
+   - Any special or hard-to-find ingredients?
+   - Potential allergens to be aware of?
+
 7. For each dish, provide a "localizedEquivalent" - a cultural comparison to a similar dish from the user's target language culture:
-   - For Chinese (zh-CN/zh-TW): Compare to Chinese dishes (e.g., "类似煎饼果子", "有点像红烧肉的做法")
-   - For French (fr): Compare to French dishes (e.g., "similaire à une crêpe bretonne")
-   - For Spanish (es): Compare to Spanish/Latin dishes (e.g., "parecido a una tortilla española")
-   - For Japanese (ja): Compare to Japanese dishes (e.g., "お好み焼きに似ている")
-   - For Korean (ko): Compare to Korean dishes (e.g., "파전과 비슷한 요리")
+   - For Chinese (zh-CN/zh-TW): Compare to Chinese dishes (e.g., "类似煎饼果子，但更薄更脆", "有点像红烧肉的做法，但用的是羊肉")
+   - For French (fr): Compare to French dishes (e.g., "similaire à une crêpe bretonne, mais plus épaisse")
+   - For Spanish (es): Compare to Spanish/Latin dishes (e.g., "parecido a una tortilla española, pero frita")
+   - For Japanese (ja): Compare to Japanese dishes (e.g., "お好み焼きに似ているが、もっと薄い")
+   - For Korean (ko): Compare to Korean dishes (e.g., "파전과 비슷하지만 더 바삭함")
    - For English or other languages: Provide a familiar Western equivalent if applicable
    - If no good cultural equivalent exists, set to null
 8. Include any relevant warnings (allergens, spiciness, etc.).
@@ -101,21 +136,23 @@ Respond with ONLY valid JSON in this exact format:
       "id": "unique-id-1",
       "dishOriginal": "original name in source language",
       "dishTranslated": "translated name",
-      "localizedEquivalent": "cultural equivalent from user's cuisine (e.g., '类似煎饼果子' for Chinese users), or null if no good equivalent",
+      "localizedEquivalent": "cultural equivalent from user's cuisine, or null",
       "tasteProfile": ["savory", "umami", "mild"],
       "reasons": {
-        "localSpecialty": "Description of whether this is a local specialty, how popular it is locally, and if it's a signature dish of the region/restaurant",
-        "tasteDescription": "Detailed description of the taste, texture, and flavor profile of this dish",
-        "history": "Brief historical or cultural background of this dish",
-        "publicReviews": "What online reviews and food critics typically say about this dish",
-        "userPreferenceMatch": "How this dish specifically matches the user's stated preferences",
-        "ingredients": "Main ingredients and components of the dish (based on menu description)"
+        "localSpecialty": "2-3 paragraphs about regional fame, popularity among locals/tourists, famous versions, seasonal availability...",
+        "tasteDescription": "2-3 paragraphs about flavors, textures, temperature, aroma, how taste develops, what makes it unique...",
+        "history": "2-3 paragraphs about origin, inventor/legends, evolution over time, cultural significance, regional variations...",
+        "publicReviews": "2-3 paragraphs about critic reviews, common praise/complaints, social media presence, typical ratings...",
+        "userPreferenceMatch": "1-2 paragraphs about how it matches user's spice tolerance, budget, adventurousness, dietary needs...",
+        "ingredients": "1-2 paragraphs about main components, sauces, special ingredients, allergens..."
       },
       "warnings": ["contains shellfish", "moderately spicy"],
       "imagePrompt": "Detailed prompt for generating an image of this dish..."
     }
   ]
 }
+
+IMPORTANT: Each "reasons" field should contain RICH, DETAILED content (2-3 paragraphs each for localSpecialty, tasteDescription, history, publicReviews; 1-2 paragraphs for userPreferenceMatch and ingredients). Do NOT provide short one-sentence answers.
 
 Provide exactly 3 recommendations (or fewer if the menu has less). Order by best match to preferences.`;
 }

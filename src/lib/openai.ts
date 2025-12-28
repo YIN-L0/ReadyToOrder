@@ -79,8 +79,8 @@ export async function analyzeMenu(
   try {
     const response = await client.chat.completions.create({
       model: 'gpt-4o',
-      max_tokens: 4096,
-      temperature: 0.3, // Lower temperature for more consistent output
+      max_tokens: 8192, // Increased for detailed multi-paragraph responses
+      temperature: 0.4, // Slightly higher for more creative, detailed descriptions
       messages: [
         {
           role: 'system',
